@@ -5,7 +5,7 @@ HEADERS = $(wildcard include/*.h include/kernel/*.h)
 ASM_OBJ_FILES = ${ASM_FILES:.s=.o}
 C_OBJ_FILES = ${C_SOURCES:.c=.o}
 
-C_FLAGS = -std=c99 -ffreestanding -mgeneral-regs-only
+C_FLAGS = -std=c99 -ffreestanding -mgeneral-regs-only -Iinclude
 
 all: run
 
