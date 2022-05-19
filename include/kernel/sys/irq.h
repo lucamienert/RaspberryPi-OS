@@ -1,5 +1,5 @@
-#ifndef _IRQ_H
-#define _IRQ_H
+#ifndef RASPOS_IRQ_H_
+#define RASPOS_IRQ_H_
 
 #include <kernel/memory.h>
 
