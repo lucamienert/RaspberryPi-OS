@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 
-uint8_t get_el();
+extern void delay(uint64_t value);
+extern uint8_t get_el();
 
 #endif
