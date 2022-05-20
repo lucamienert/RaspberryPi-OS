@@ -54,7 +54,7 @@ el1_entry:
     mov x0, #0xffff000000000000
     add sp, sp, x0
 
-    ldr x0, =KMain
+    ldr x0, =kernel_main
     blr x0
 
 halt:

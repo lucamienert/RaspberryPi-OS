@@ -147,7 +147,6 @@ sync_handler:
     handler_entry
     b trap_return
 
-
 irq_handler:
     kernel_entry
     mov x0, #2
@@ -186,4 +185,3 @@ swap:
     add sp,  sp,  #(12 * 8)
 
     ret
-    

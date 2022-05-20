@@ -11,7 +11,6 @@
 .global load_pgd
 .global read_pgd
 
-
 read_pgd:
     mrs x0, ttbr0_el1
     ret
@@ -88,7 +87,6 @@ loop2:
     cmp x0, x2
     blo loop2
 
-
 setup_uvm:
     adr x0, pgd_ttbr0
     adr x1, pud_ttbr0
@@ -106,7 +104,6 @@ setup_uvm:
 
     ret
 
-
 .balign 4096
 pgd_ttbr1:
     .space 4096
@@ -117,14 +114,9 @@ pmd_ttbr1:
 pmd_3_ttbr1:
     .space 4096
 
-
 pgd_ttbr0:
     .space 4096
 pud_ttbr0:
     .space 4096
 pmd_ttbr0:
     .space 4096
-
-
-
-	
