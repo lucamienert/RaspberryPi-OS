@@ -43,7 +43,7 @@ static uint32_t get_cluster_offset(uint32_t index)
 
 static uint32_t get_cluster_size(void)
 {
-    struct BPB* bpb = get_fs_bpb();
+    struct BPB *bpb = get_fs_bpb();
 
     return (uint32_t)bpb->bytes_per_sector * bpb->sectors_per_cluster;
 }
@@ -70,10 +70,8 @@ static bool is_file_name_equal(struct DirEntry *dir_entry, char *name, char *ext
 {
     bool status = false;
 
-    if (memcmp(dir_entry->name, name, 8) == 0 &&
-        memcmp(dir_entry->ext, ext, 3) == 0) {
+    if (memcmp(dir_entry->name, name, 8) == 0 && memcmp(dir_entry->ext, ext, 3) == 0)
         status = true;
-    }
 
     return status;
 }
@@ -82,29 +80,29 @@ static bool split_path(char *path, char *name, char *ext)
 {
     int i;
 
-    for (i = 0; i < 8 && path[i] != '.' && path[i] != '\0'; i++) {
-        if (path[i] == '/') {
+    for (i = 0; i < 8 && path[i] != '.' && path[i] != '\0'; i++) 
+    {
+        if (path[i] == '/')
             return false;
-        }
 
         name[i] = path[i];
     }
 
-    if (path[i] == '.') {
+    if (path[i] == '.') 
+    {
         i++;
         
-        for (int j = 0; j < 3 && path[i] != '\0'; i++, j++) {
-            if (path[i] == '/') {
+        for (int j = 0; j < 3 && path[i] != '\0'; i++, j++) 
+        {
+            if (path[i] == '/')
                 return false;
-            }
 
             ext[j] = path[i];
         }
     }
 
-    if (path[i] != '\0') {        
+    if (path[i] != '\0')
         return false;
-    }
 
     return true;
 }
@@ -118,21 +116,22 @@ static uint32_t search_file(char *path)
 
     bool status = split_path(path, name, ext);
 
-    if (status == true) {
+    if (status == true) 
+    {
         root_entry_count = get_root_directory_count();
         dir_entry = get_root_directory();
         
-        for (uint32_t i = 0; i < root_entry_count; i++) {
+        for (uint32_t i = 0; i < root_entry_count; i++) 
+        {
             if (dir_entry[i].name[0] == ENTRY_EMPTY || dir_entry[i].name[0] == ENTRY_DELETED)
                 continue;
 
-            if (dir_entry[i].attributes == 0xf) {
+            if (dir_entry[i].attributes == 0xf)
                 continue;
-            }
 
-            if (is_file_name_equal(&dir_entry[i], name, ext)) {
+
+            if (is_file_name_equal(&dir_entry[i], name, ext))
                 return i;
-            }
         }
     }
 
@@ -154,7 +153,8 @@ static uint32_t read_raw_data(uint32_t cluster_index, char *buffer, uint32_t pos
         
     bpb = get_fs_bpb();
 
-    if (offset != 0) {
+    if (offset != 0) 
+    {
         read_size = (offset + size) <= cluster_size ? size : (cluster_size - offset);
         data = (char*)(get_cluster_offset(index) + (uint64_t)bpb);
         memcpy(buffer, data + offset, read_size);
@@ -162,10 +162,12 @@ static uint32_t read_raw_data(uint32_t cluster_index, char *buffer, uint32_t pos
         index = get_cluster_value(index);
     }
 
-    while (read_size < size && index < 0xfff7) {
+    while (read_size < size && index < 0xfff7) 
+    {
         data = (char*)(get_cluster_offset(index) + (uint64_t)bpb);
 
-        if (read_size + cluster_size >= size) {
+        if (read_size + cluster_size >= size) 
+        {
             memcpy(buffer, data, size - read_size);
             read_size = size;
             break;
@@ -186,9 +188,8 @@ uint32_t read_file(struct Process *process, int fd, void *buffer, uint32_t size)
     uint32_t file_size = process->file[fd]->fcb->file_size;
     uint32_t read_size;
 
-    if (position + size  > file_size) {
+    if (position + size  > file_size)
         return -1;
-    }
 
     read_size = read_raw_data(process->file[fd]->fcb->cluster_index, buffer, position, size);
     process->file[fd]->position += read_size;
@@ -200,7 +201,8 @@ static uint32_t get_fcb(uint32_t index)
 {
     struct DirEntry *dir_table;
 
-    if (fcb_table[index].count == 0) {
+    if (fcb_table[index].count == 0) 
+    {
         dir_table = get_root_directory();
         fcb_table[index].dir_index = index;
         fcb_table[index].file_size = dir_table[index].file_size;
@@ -226,32 +228,33 @@ int open_file(struct Process *proc, char *path_name)
     uint32_t entry_index;
     uint32_t fcb_index;
 
-    for (int i = 0; i < 100; i++) {
-        if (proc->file[i] == NULL) {
+    for (int i = 0; i < 100; i++) 
+    {
+        if (proc->file[i] == NULL) 
+        {
             fd = i;
             break;
         }
     }
 
-    if (fd == -1) {
+    if (fd == -1)
         return -1;
-    }
 
-    for (int i = 0; i < PAGE_SIZE / sizeof(struct FileDesc); i++) {
-        if (file_desc_table[i].fcb == NULL) {
+    for (int i = 0; i < PAGE_SIZE / sizeof(struct FileDesc); i++) 
+    {
+        if (file_desc_table[i].fcb == NULL)
+        {
             file_desc_index = i;
             break;
         }
     }
 
-    if (file_desc_index == -1) {
+    if (file_desc_index == -1)
         return -1;
-    }
 
     entry_index = search_file(path_name);
-    if (entry_index == 0xffffffff) {
+    if (entry_index == 0xffffffff)
         return -1;
-    }
 
     fcb_index = get_fcb(entry_index);
     memset(&file_desc_table[file_desc_index], 0, sizeof(struct FileDesc));
@@ -272,9 +275,8 @@ void close_file(struct Process *proc, int fd)
     put_fcb(proc->file[fd]->fcb);
     proc->file[fd]->count--;
 
-    if (proc->file[fd]->count == 0) {
+    if (proc->file[fd]->count == 0)
         proc->file[fd]->fcb = NULL;
-    }
 
     proc->file[fd] = NULL;
 }
@@ -292,9 +294,8 @@ int read_root_directory(char *buffer)
 static bool init_fcb(void)
 {
     fcb_table = (struct FCB*)kalloc();
-    if (fcb_table == NULL) {
+    if (fcb_table == NULL)
         return false;
-    }
 
     memset(fcb_table, 0, PAGE_SIZE);
 
@@ -304,9 +305,8 @@ static bool init_fcb(void)
 static bool init_file_desc(void)
 {
     file_desc_table = (struct FileDesc*)kalloc();
-    if (file_desc_table == NULL) {
+    if (file_desc_table == NULL)
         return false;
-    }
 
     memset(file_desc_table, 0, PAGE_SIZE);
 
