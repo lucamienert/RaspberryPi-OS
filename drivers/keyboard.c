@@ -1,7 +1,7 @@
-#include "keyboard.h"
-#include "print.h"
-#include "process.h"
-#include "uart.h"
+#include <drivers/keyboard.h>
+#include <drivers/display.h>
+#include <kernel/process.h>
+#include <stdio.h>
 
 static struct KeyboardBuffer key_buffer = { {0}, 0, 0, 500 };
 
