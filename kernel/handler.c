@@ -5,6 +5,14 @@ static uint64_t ticks = 0;
 
 void init_interrupt_controller(void)
 {
+#ifdef RASPOS_3
+    out_word(DISABLE_BASIC_IRQS, 0xffffffff);
+    out_word(DISABLE_IRQS_1, 0xffffffff);
+    out_word(DISABLE_IRQS_2, 0xffffffff);
+
+    out_word(ENABLE_BASIC_IRQS, 1);
+    out_word(ENABLE_IRQS_2, (1 << 25));
+#else
     out_word(DIST, 0);
     out_word(CPU_INTERFACE, 0);
 
@@ -24,6 +32,7 @@ void init_interrupt_controller(void)
 
     out_word(DIST, 1);
     out_word(CPU_INTERFACE, 1);
+#endif
 }
 
 void init_timer(void)
@@ -80,6 +89,22 @@ void handler(struct TrapFrame *tf)
         case 2:
             irq = get_irq_number();
 
+#ifdef RASPOS_3
+            if (irq & 1) 
+            {
+                timer_interrupt_handler();
+                schedule = 1;
+            }
+            else if (irq & (1 << 19)) 
+            {
+                uart_handler();
+            }
+            else 
+            {
+                printk("unknown irq\r\n");
+                while (1) {}
+            }
+#else
             if (irq == 64) 
             {
                 timer_interrupt_handler();
@@ -94,8 +119,9 @@ void handler(struct TrapFrame *tf)
                 printk("unknown irq\r\n");
                 while (1) {}
             }
-
             out_word(ICC_EOI, irq);
+#endif
+
             break;
 
         case 3:
