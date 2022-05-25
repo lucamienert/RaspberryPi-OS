@@ -3,6 +3,27 @@
 
 #include <kernel/memory.h>
 
+#ifdef RASPOS_3
+
+#define BASE_ADDR           P2V(0x3f000000)
+
+#define IRQ_BASIC_PENDING	(BASE_ADDR + 0xB200)
+#define ENABLE_IRQS_1		(BASE_ADDR + 0xB210)
+#define ENABLE_IRQS_2		(BASE_ADDR + 0xB214)
+#define ENABLE_BASIC_IRQS	(BASE_ADDR + 0xB218)
+#define DISABLE_IRQS_1		(BASE_ADDR + 0xB21C)
+#define DISABLE_IRQS_2		(BASE_ADDR + 0xB220)
+#define DISABLE_BASIC_IRQS	(BASE_ADDR + 0xB224)
+
+
+#define TIMER_LOAD          (BASE_ADDR + 0xB400)
+#define TIMER_CTL           (BASE_ADDR + 0xB408)
+#define TIMER_ACK           (BASE_ADDR + 0xB40C)
+#define TIMER_MSKIRQ        (BASE_ADDR + 0xB414)
+#define TIMER_PREDIV        (BASE_ADDR + 0xB41c)
+ 
+#else
+
 #define GIC_BASE            P2V(0xff840000)
 #define BASE_ADDR           P2V(0xfe000000)
 
@@ -22,11 +43,12 @@
 #define ICC_ACK             CPU_INTERFACE + 0xc
 #define ICC_EOI             CPU_INTERFACE + 0x10
 
-
 #define TIMER_LOAD          (BASE_ADDR + 0xB400)
 #define TIMER_CTL           (BASE_ADDR + 0xB408)
 #define TIMER_ACK           (BASE_ADDR + 0xB40C)
 #define TIMER_MSKIRQ        (BASE_ADDR + 0xB414)
 #define TIMER_PREDIV        (BASE_ADDR + 0xB41c)
- 
+
+#endif
+
 #endif
