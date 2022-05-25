@@ -1,11 +1,13 @@
-#include "syscall.h"
-#include "print.h"
-#include "debug.h"
-#include "stddef.h"
-#include "handler.h"
-#include "process.h"
-#include "file.h"
-#include "keyboard.h"
+#include <kernel/sys/syscall.h>
+#include <kernel/handler.h>
+#include <kernel/process.h>
+
+#include <fs/filesystem.h>
+#include <drivers/keyboard.h>
+
+#include <stdio.h>
+#include <assert.h>
+#include <stddef.h>
 
 static SYSTEMCALL system_calls[20];
 
@@ -24,7 +26,8 @@ static int sys_sleep(int64_t *argptr)
     ticks = get_ticks();
     old_ticks = ticks;
 
-    while (ticks - old_ticks < sleep_ticks) {
+    while (ticks - old_ticks < sleep_ticks) 
+    {
         sleep(-1);
         ticks = get_ticks();
     }
@@ -99,7 +102,8 @@ void system_call(struct TrapFrame *tf)
     int64_t param_count = tf->x0;
     int64_t *argptr = (int64_t*)tf->x1;
 
-    if (param_count < 0 || i < 0 || i > 11) {
+    if (param_count < 0 || i < 0 || i > 11)
+    {
         tf->x0 = -1;
         return;
     }
