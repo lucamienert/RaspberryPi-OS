@@ -1,6 +1,6 @@
 ASM_FILES = $(wildcard asm/*.s include/asm/*.s)
-C_SOURCES = $(wildcard kernel/*.c libc/*.c)
-HEADERS = $(wildcard include/*.h include/kernel/*.h)
+C_SOURCES = $(wildcard kernel/*.c kernel/sys/*.c fs/*.c drivers/*.c libc/*.c)
+HEADERS = $(wildcard include/*.h include/kernel/*.h include/kernel/sys/*.h include/fs/*.h include/drivers/*.h include/asm/*.h)
 
 OBJ_FILES = ${ASM_FILES:.s=.o}
 OBJ_FILES += ${C_SOURCES:.c=.o}
@@ -10,7 +10,7 @@ DEP_FILES = $(OBJ_FILES:%.o=%.d)
 
 C_FLAGS = -std=c99 -ffreestanding -mgeneral-regs-only -Iinclude
 
-all: run
+all: kernel8.img
 
 %.o: %.s
 	aarch64-linux-gnu-gcc -c $< -o $@
