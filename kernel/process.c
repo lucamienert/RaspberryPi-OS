@@ -1,7 +1,7 @@
-#include "process.h"
-#include "memory.h"
-#include "debug.h"
-#include "stddef.h"
+#include <kernel/process.h>
+#include <kernel/memory.h>
+#include <stddef.h>
+#include <assert.h>
 
 static struct Process process_table[NUM_PROC];
 static int pid_num = 1;
@@ -17,8 +17,10 @@ static struct Process* find_unused_process(void)
 {
     struct Process *process = NULL;
 
-    for (int i = 0; i < NUM_PROC; i++) {
-        if (process_table[i].state == PROC_UNUSED) {
+    for (int i = 0; i < NUM_PROC; i++) 
+    {
+        if (process_table[i].state == PROC_UNUSED) 
+        {
             process = &process_table[i];
             break;
         }
@@ -26,7 +28,6 @@ static struct Process* find_unused_process(void)
 
     return process;
 }
-
 
 static void init_idle_process(void)
 {
@@ -49,9 +50,9 @@ static struct Process* alloc_new_process(void)
     struct Process *process;
 
     process = find_unused_process();
-    if (process == NULL) {
+
+    if (process == NULL)
         return NULL;
-    }
 
     process->stack = (uint64_t)kalloc();
     ASSERT(process->stack != 0);
@@ -115,12 +116,10 @@ static void schedule(void)
     list = &process_control->ready_list;
     prev_proc = process_control->current_process;
 
-    if (is_list_empty(list)) {
+    if (is_list_empty(list))
         current_proc = &process_table[0];
-    }
-    else {
+    else
         current_proc = (struct Process*)remove_list_head(list);
-    }
 
     current_proc->state = PROC_RUNNING;
     process_control->current_process = current_proc;
@@ -137,16 +136,14 @@ void yield(void)
     process_control = get_pc();
     list = &process_control->ready_list;
 
-    if (is_list_empty(list)) {
+    if (is_list_empty(list))
         return;
-    }
 
     process = process_control->current_process;
     process->state = PROC_READY;
 
-    if (process->pid != 0) {
+    if (process->pid != 0)
         append_list_tail(list, (struct List*)process);
-    }
 
     schedule();
 }
@@ -176,12 +173,13 @@ void wake_up(int wait)
     ready_list = &process_control->ready_list;
     wait_list = &process_control->wait_list;
 
-    process = (struct Process*)remove_list(wait_list, wait);
+    process = (struct Process*) remove_list(wait_list, wait);
 
-    while (process != NULL) {
+    while (process != NULL) 
+    {
         process->state = PROC_READY;
-        append_list_tail(ready_list, (struct List*)process);
-        process = (struct Process*)remove_list(wait_list, wait);
+        append_list_tail(ready_list, (struct List*) process);
+        process = (struct Process*) remove_list(wait_list, wait);
     }
 }
 
@@ -210,22 +208,26 @@ void wait(int pid)
     process_control = get_pc();
     list = &process_control->kill_list;
 
-    while (1) {
-        if (!is_list_empty(list)) {
+    while (1) 
+    {
+        if (!is_list_empty(list)) 
+        {
             process = (struct Process*)remove_list(list, pid);
-            if (process != NULL) {
+            if (process != NULL) 
+            {
                 ASSERT(process->state == PROC_KILLED);
                 kfree(process->stack);
                 free_vm(process->page_map);
 
-                for (int i = 0; i < 100; i++) {
-                    if (process->file[i] != NULL) {
+                for (int i = 0; i < 100; i++) 
+                {
+                    if (process->file[i] != NULL) 
+                    {
                         process->file[i]->fcb->count--;
                         process->file[i]->count--;
 
-                        if (process->file[i]->count == 0) {
+                        if (process->file[i]->count == 0)
                             process->file[i]->fcb = NULL;
-                        }
                     }
                 }
 
@@ -250,20 +252,24 @@ int fork(void)
     list = &process_control->ready_list;
 
     process = alloc_new_process();
-    if (process == NULL) {
+    if (process == NULL) 
+    {
         ASSERT(0);
         return -1;
     }
 
-    if (copy_uvm(process->page_map, current_process->page_map, PAGE_SIZE) == false) {
+    if (copy_uvm(process->page_map, current_process->page_map, PAGE_SIZE) == false) 
+    {
         ASSERT(0);
         return -1;
     }
 
     memcpy(process->file, current_process->file, 100 * sizeof(struct FileDesc*));
 
-    for (int i = 0; i < 100; i++) {
-        if (process->file[i] != NULL) {
+    for (int i = 0; i < 100; i++) 
+    {
+        if (process->file[i] != NULL) 
+        {
             process->file[i]->count++;
             process->file[i]->fcb->count++;
         }
@@ -283,16 +289,14 @@ int exec(struct Process *process, char *name)
     uint32_t size;
 
     fd = open_file(process, name);
-    if (fd == -1) {
+    if (fd == -1)
         exit();
-    }
 
     memset((void*)0x400000, 0, PAGE_SIZE);
     size = get_file_size(process, fd);
     size = read_file(process, fd, (void*)0x400000, size);
-    if (size == 0xffffffff) {
+    if (size == 0xffffffff)
         exit();
-    }
 
     close_file(process, fd);
 
