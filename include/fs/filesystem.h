@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-struct BPB 
+typedef struct BPB 
 {
     uint8_t jump[3];
     uint8_t oem[8];
@@ -26,9 +26,9 @@ struct BPB
     uint32_t volume_id;
     uint8_t volume_label[11];
     uint8_t file_system[8];
-} __attribute__((packed));
+} __attribute__((packed)) bpb_t;
 
-struct DirEntry 
+typedef struct DirEntry 
 {
     uint8_t name[8];
     uint8_t ext[3];
@@ -43,37 +43,37 @@ struct DirEntry
     uint16_t m_date;
     uint16_t cluster_index;
     uint32_t file_size;
-} __attribute__((packed));
+} __attribute__((packed)) direntry_t;
 
-struct FCB 
+typedef struct FCB 
 {
     char name[8];
     char ext[3];
     uint32_t cluster_index;
     uint32_t dir_index;
     uint32_t file_size;
-    int count;
-};
+    int32_t count;
+} fcb_t;
 
-struct FileDesc 
+typedef struct FileDesc 
 {
     struct FCB *fcb;
     uint32_t position;
-    int count;
-};
+    int32_t count;
+} filedesc_t;
 
 #define FS_BASE P2V(0x30000000)
 #define ENTRY_EMPTY 0
 #define ENTRY_DELETED 0xe5
 
-struct Process;
+typedef struct Process process_t;
 
 void init_fs(void);
-int load_file(char *path, uint64_t addr);
-int open_file(struct Process *proc, char *path_name);
-void close_file(struct Process *proc, int fd);
-uint32_t get_file_size(struct Process *process, int fd);
-uint32_t read_file(struct Process *process, int fd, void *buffer, uint32_t size);
-int read_root_directory(char *buffer);
+int32_t load_file(char *path, uint64_t addr);
+int32_t open_file(process_t *proc, char *path_name);
+void close_file(process_t *proc, int32_t fd);
+uint32_t get_file_size(process_t *process, int32_t fd);
+uint32_t read_file(process_t *process, int32_t fd, void *buffer, uint32_t size);
+int32_t read_root_directory(char *buffer);
 
 #endif
